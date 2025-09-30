@@ -59,44 +59,31 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const webhookData = {
+      date: selectedDate?.toISOString().split("T")[0],
+      time: selectedTime,
+      name: formData.name,
+      email: formData.email,
+      company: formData.company,
+      phone: formData.phone,
+      message: formData.message,
+      timestamp: new Date().toISOString(),
+    }
+
     try {
-      const webhookData = {
-        date: selectedDate?.toISOString().split("T")[0],
-        time: selectedTime,
-        name: formData.name,
-        email: formData.email,
-        company: formData.company,
-        phone: formData.phone,
-        message: formData.message,
-        timestamp: new Date().toISOString(),
-      }
-
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      const apiUrl = `${supabaseUrl}/functions/v1/booking-webhook`
-
-      const response = await fetch(apiUrl, {
+      await fetch("https://n8n.apps.envaire.com/webhook/a8b9cc05-4c69-409c-91a5-67d31c64857e", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify(webhookData),
       })
 
-      if (response.ok) {
-        console.log("Booking submitted successfully:", webhookData)
-        alert("Meeting booked successfully! We'll contact you soon.")
-        // Reset form
-        setFormData({ name: "", email: "", company: "", phone: "", message: "" })
-        setSelectedDate(new Date())
-        setSelectedTime("")
-        onClose()
-      } else {
-        const errorData = await response.json()
-        console.error("Failed to submit booking:", errorData)
-        alert("Failed to submit booking. Please try again.")
-      }
+      alert("Meeting booked successfully! We'll contact you soon.")
+      setFormData({ name: "", email: "", company: "", phone: "", message: "" })
+      setSelectedDate(new Date())
+      setSelectedTime("")
+      onClose()
     } catch (error) {
       console.error("Error submitting booking:", error)
       alert("Failed to submit booking. Please try again.")
