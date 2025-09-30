@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarDays, Clock, User, Mail, Building, MessageSquare, Phone } from "lucide-react"
+import { CalendarDays, Clock, User, Mail, Building, MessageSquare, Phone, CheckCircle2 } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 
 // Dynamic import for calendar to avoid SSR issues
@@ -50,6 +50,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
     message: "",
   })
   const [isMounted, setIsMounted] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
   const { t } = useLanguage()
 
   useEffect(() => {
@@ -79,14 +80,17 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
         body: JSON.stringify(webhookData),
       })
 
-      alert("Meeting booked successfully! We'll contact you soon.")
+      setShowSuccess(true)
       setFormData({ name: "", email: "", company: "", phone: "", message: "" })
       setSelectedDate(new Date())
       setSelectedTime("")
-      onClose()
+
+      setTimeout(() => {
+        setShowSuccess(false)
+        onClose()
+      }, 3000)
     } catch (error) {
       console.error("Error submitting booking:", error)
-      alert("Failed to submit booking. Please try again.")
     }
   }
 
@@ -95,8 +99,22 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-black border-gray-800">
+    <>
+      {showSuccess && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 border border-emerald-500/50 rounded-2xl p-8 max-w-md mx-4 animate-in fade-in zoom-in duration-300">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">Meeting Booked!</h3>
+              <p className="text-gray-300">Thank you for booking. We'll get in contact with you soon.</p>
+            </div>
+          </div>
+        </div>
+      )}
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-black border-gray-800">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white mb-2">{t("booking.title")}</DialogTitle>
           <p className="text-gray-300">{t("booking.subtitle")}</p>
@@ -295,7 +313,8 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
             </p>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
