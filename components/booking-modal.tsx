@@ -71,26 +71,35 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
         timestamp: new Date().toISOString(),
       }
 
-      const response = await fetch("https://n8n.apps.envaire.com/webhook-test/a8b9cc05-4c69-409c-91a5-67d31c64857e", {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      const apiUrl = `${supabaseUrl}/functions/v1/booking-webhook`
+
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify(webhookData),
       })
 
       if (response.ok) {
         console.log("Booking submitted successfully:", webhookData)
+        alert("Meeting booked successfully! We'll contact you soon.")
         // Reset form
         setFormData({ name: "", email: "", company: "", phone: "", message: "" })
         setSelectedDate(new Date())
         setSelectedTime("")
         onClose()
       } else {
-        console.error("Failed to submit booking")
+        const errorData = await response.json()
+        console.error("Failed to submit booking:", errorData)
+        alert("Failed to submit booking. Please try again.")
       }
     } catch (error) {
       console.error("Error submitting booking:", error)
+      alert("Failed to submit booking. Please try again.")
     }
   }
 
