@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST="{\"components/booking-modal.tsx -> @/components/ui/calendar\":{\"id\":\"components/booking-modal.tsx -> @/components/ui/calendar\",\"files\":[\"static/chunks/_app-pages-browser_components_ui_calendar_tsx.js\"]}}"
